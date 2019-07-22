@@ -46,14 +46,14 @@ const genStr = (strLength = 1) => {
 };
 
 //Мой генератор массива заданий
-const genTaskArray = (taskCount = 1) => {
+const genTasksArray = (taskCount = 1) => {
   const resultArr = [];
   for (i = 0; i < taskCount; i++)
     resultArr[i] = {
       _id: genID(),
       title: genStr(Math.floor(Math.random() * 3) + 2),
-      specification: genStr(Math.floor(Math.random() * 54) + 10),
-      completed: Math.random() * 10 < 3 //примерно 30% заданий выполненные уже
+      specification: genStr(Math.floor(Math.random() * 22) + 10),
+      completed: Math.random() * 10 < 4 //примерно 40% заданий выполненные уже
     };
   return resultArr;
 };
