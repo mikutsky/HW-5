@@ -6,11 +6,6 @@ const taskArr = genTasksArray(4);
 //требует дополнительной сортировки. Приимущества в поиске эллемента по ключу
 //нивелируются сложностями с порядком выдачи, или генерацией ID попорядку.
 
-// const taskMap = taskArr.reduce((acc, task) => {
-//   acc[task._id] = task;
-//   return acc;
-// }, []);
-
 //ШАБЛОН для вывода задачи в <li> с кнопочками выполненно и удалить, и прочими
 //элементами управления
 function tmpTaskItemLi(task, index) {
@@ -47,14 +42,12 @@ function tmpTaskItemLi(task, index) {
   pSpec.className = "mb-1";
   pSpec.textContent = task.specification;
 
-  //Выделить выполненные <class>//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //Выделить выполненные <class>
   if (task.completed) {
     liTask.classList.add("list-group-item-info");
-    // liTask.classList.add("to-comleted");
     btnComleted.classList.add("btn-light");
   } else {
     liTask.classList.add("align-items-start");
-    // liTask.classList.add("to-not-comleted");
     btnComleted.classList.add("btn-secondary");
   }
 
@@ -87,10 +80,7 @@ function tmpTaskItemLi(task, index) {
 //поле с порядковым номером задачи, т.к. индекс будет менятся. Или использовать
 //ассоциированый массив, как предпологалось в начале, c полем Номер по порядку.
 //И следить что бы это поле правильно заполнялось.
-function tmpTasksListUl(
-  taskArr,
-  { activePage = "All", sortByNumber, sortByCompleted }
-) {
+function tmpTasksListUl(taskArr, { sortByNumber, sortByCompleted }) {
   const ulTasks = document.createElement("ul");
   ulTasks.id = "tasksList";
   ulTasks.className = "list-group";
@@ -271,7 +261,7 @@ function onAddNewEl(el) {
   document.forms[0].reset();
 
   taskArr.push(task);
-  renderHTML(taskArr, taskView); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  renderHTML(taskArr, taskView);
 }
 
 //Событие удаления <li> и из массива
