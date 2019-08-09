@@ -4,75 +4,78 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     />
+    <title>Document</title>
   </head>
-  <body style="background-color: #dee2e6">
-    <div style="width: 960px;">
-      <div
-        class="shadow-lg pb-2 pt-3 pl-3 mb-1 mt-4 ml-auto mr-auto bg-white rounded"
-        style="width: 720px;"
-      >
-        <h3 class="">NEW TASK</h3>
+  <body>
+    <div class="form-section mt-5">
+      <div class="container">
+        <div class="row">
+          <div class="col col-6 mx-auto">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Add new task</h5>
+                <form name="add-task">
+                  <input
+                    type="text"
+                    name="title"
+                    id="title"
+                    class="form-control"
+                    placeholder="Title"
+                  />
+                  <input
+                    type="text"
+                    name="body"
+                    id="body"
+                    class="form-control mt-3"
+                    placeholder="Body"
+                  />
+                  <input
+                    type="checkbox"
+                    name="completed"
+                    id="completed"
+                    class="mt-3 mr-2"
+                  /><label for="completed">Completed:</label>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    Add task
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div
-        class="shadow-lg p-3 mb-4 mt-1 ml-auto mr-auto bg-white rounded"
-        style="width: 720px;"
-      >
-        <form>
-          <fieldset>
-            <div class="form-group">
-              <label for="InputTaskTitle">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                id="InputTaskTitle"
-                placeholder="Task title"
-              />
-            </div>
-            <div class="form-group">
-              <label for="InputTaskSpecification">Specification</label>
-              <input
-                type="text"
-                class="form-control"
-                id="InputTaskSpecification"
-                placeholder="Task specification"
-              />
-            </div>
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                id="CheckCompleted"
-              />
-              <label class="form-check-label" for="disabledFieldsetCheck">
-                Comleted
-              </label>
-            </div>
-            <button
-              type="button"
-              class="btn btn-primary btn-block"
-              id="AddNewTask"
-            >
-              Add task
-            </button>
-          </fieldset>
-        </form>
-      </div>
-      <div
-        id="Container"
-        class="shadow-lg p-3 mb-4 mt-4 ml-auto mr-auto bg-white rounded"
-        style="width: 720px;"
-      ></div>
     </div>
-    
-    <script src="https://kit.fontawesome.com/33ee18adf3.js"></script>
-    <script src="taskGenerator.js"></script>
+    <div class="tasks-list-section mt-5">
+      <div class="container" id="warning-list-empty">
+        <p class=" bg-warning text-white p-2">
+          The task list is empty...
+        </p>
+      </div>
+      <div
+        class="container btn-group btn-group-sm pb-2 d-none"
+        role="group"
+        id="panel-view-settings"
+        style="display: block"
+      >
+        <button type="button" class="btn btn-secondary" name="view-all">
+          All
+        </button>
+        <button type="button" class="btn btn-secondary" name="view-uncompleted">
+          Uncompleted
+        </button>
+      </div>
+      <div class="container">
+        <ul class="list-group">
+          <!-- Список задач -->
+        </ul>
+      </div>
+    </div>
     <script src="app.js"></script>
   </body>
 </html>

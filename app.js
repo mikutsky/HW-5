@@ -1,353 +1,196 @@
-//Генерируем массив задач
-const taskArr = genTasksArray(4);
-
-//С обычным массивом удобней работать, т.к. ассоциативные массивы сортируются
-//по ключам в алфавитном порядке, что вносит некоторую путанницу в выдачу, и
-//требует дополнительной сортировки. Приимущества в поиске эллемента по ключу
-//нивелируются сложностями с порядком выдачи, или генерацией ID попорядку.
-
-//ШАБЛОН для вывода задачи в <li> с кнопочками выполненно и удалить, и прочими
-//элементами управления
-function tmpTaskItemLi(task, index) {
-  //ID задачи кидаем в data-task-id
-  const liTask = document.createElement("li");
-  liTask.dataset.taskId = task._id;
-  liTask.dataset.taskCompleted = task.completed;
-  liTask.className = "list-group-item list-group-item-action flex-column";
-
-  const divTaskHeader = document.createElement("div");
-  divTaskHeader.className = "d-flex w-100 justify-content-between";
-
-  //Название задачи в <H5>
-  const h5Task = document.createElement("h5");
-  h5Task.className = "mb-1";
-  h5Task.textContent = `${index + 1}. ${task.title}`;
-
-  const divBtn = document.createElement("div");
-
-  const btnComleted = document.createElement("button");
-  btnComleted.type = "Button";
-  btnComleted.className = "btn btn-sm";
-  btnComleted.textContent = "Completed";
-
-  const btnDeleted = document.createElement("button");
-  btnDeleted.type = "Button";
-  btnDeleted.className = "btn btn-danger btn-sm ml-1";
-  btnDeleted.textContent = "Delete";
-
-  const divSpec = document.createElement("div");
-
-  //Описание задачи в <P>
-  const pSpec = document.createElement("p");
-  pSpec.className = "mb-1";
-  pSpec.textContent = task.specification;
-
-  //Выделить выполненные <class>
-  if (task.completed) {
-    liTask.classList.add("list-group-item-info");
-    btnComleted.classList.add("btn-light");
-  } else {
-    liTask.classList.add("align-items-start");
-    btnComleted.classList.add("btn-secondary");
+const arrOfTasks = [
+  {
+    _id: "5d2ca9e2e03d40b326596aa7",
+    completed: true,
+    body:
+      "Occaecat non ea quis occaecat ad culpa amet deserunt incididunt elit fugiat pariatur. Exercitation commodo culpa in veniam proident laboris in. Excepteur cupidatat eiusmod dolor consectetur exercitation nulla aliqua veniam fugiat irure mollit. Eu dolor dolor excepteur pariatur aute do do ut pariatur consequat reprehenderit deserunt.\r\n",
+    title: "Eu ea incididunt sunt consectetur fugiat non."
+  },
+  {
+    _id: "5d2ca9e29c8a94095c4e88e0",
+    completed: false,
+    body:
+      "Aliquip cupidatat ex adipisicing veniam do tempor. Lorem nulla adipisicing et esse cupidatat qui deserunt in fugiat duis est qui. Est adipisicing ipsum qui cupidatat exercitation. Cupidatat aliqua deserunt id deserunt excepteur nostrud culpa eu voluptate excepteur. Cillum officia proident anim aliquip. Dolore veniam qui reprehenderit voluptate non id anim.\r\n",
+    title:
+      "Deserunt laborum id consectetur pariatur veniam occaecat occaecat tempor voluptate pariatur nulla reprehenderit ipsum."
   }
+];
 
-  //События
-  btnDeleted.addEventListener("click", onRemoveEl);
-  btnComleted.addEventListener("click", onCompletedEl);
+//Модуль для работы со списком задач
+function InitTasks(arrOfTasks = []) {
+  const list = arrOfTasks.reduce((acc, el) => {
+    acc[el._id] = el;
+    return acc;
+  }, {});
+  return {
+    //методы
+    addTask: (title, body, completed) => {
+      const newTask = {
+        title,
+        body,
+        completed,
+        _id: (
+          Array(12).join("0") +
+          Math.random()
+            .toString(16)
+            .slice(2)
+        ).slice(-12)
+      };
+      list[newTask._id] = newTask;
+      return { ...newTask };
+    },
 
-  //Вкладываю дочерние в родительские
-  divBtn.appendChild(btnComleted);
-  divBtn.appendChild(btnDeleted);
+    remove: id => {
+      delete list[id];
+      return id;
+    },
 
-  divTaskHeader.appendChild(h5Task);
-  divTaskHeader.appendChild(divBtn);
+    switchcompleted: (id, completed = !list[id].completed) => {
+      list[id].completed = completed;
+    },
 
-  divSpec.appendChild(pSpec);
+    length: () => Object.keys(list).length,
 
-  liTask.appendChild(divTaskHeader);
-  liTask.appendChild(divSpec);
-
-  return liTask;
-}
-
-//ШАБЛОН для вывода нескольких задач из переданного массива в <ul>
-
-//Не создаю дополнительный массив для сортировки, сортирую прямо при выдачи.
-//Можно спорить хороший ли это вариант, но я подумал так проще реализовать:
-//отдал в нужном порядке в документ все остальное поведения реализовал
-//в событиях.
-//Еще вариант: можно отдавать отсортированный массив, но тогда нужно добавить
-//поле с порядковым номером задачи, т.к. индекс будет менятся. Или использовать
-//ассоциированый массив, как предпологалось в начале, c полем Номер по порядку.
-//И следить что бы это поле правильно заполнялось.
-function tmpTasksListUl(taskArr, { sortByNumber, sortByCompleted }) {
-  const ulTasks = document.createElement("ul");
-  ulTasks.id = "tasksList";
-  ulTasks.className = "list-group";
-
-  //Если НУЖНА сортировка по Comleted
-  if (sortByCompleted) {
-    //Список ВЫПОЛНЕННЫХ задач выводим
-    for (let i = 0; i < taskArr.length; i++)
-      if (!taskArr[i].completed)
-        if (sortByNumber)
-          //Порядок выведения A-Z или Z-A
-          ulTasks.insertAdjacentElement(
-            "beforeend",
-            tmpTaskItemLi(taskArr[i], i)
-          );
-        else
-          ulTasks.insertAdjacentElement(
-            "afterbegin",
-            tmpTaskItemLi(taskArr[i], i)
-          );
-    //Список НЕ ВЫПОЛНЕННЫХ задач выводим
-    for (let i = 0; i < taskArr.length; i++)
-      if (taskArr[i].completed)
-        if (sortByNumber)
-          //Порядок выведения A-Z или Z-A
-          ulTasks.insertAdjacentElement(
-            "beforeend",
-            tmpTaskItemLi(taskArr[i], i)
-          );
-        else
-          ulTasks.insertAdjacentElement(
-            "afterbegin",
-            tmpTaskItemLi(taskArr[i], i)
-          );
-  }
-  //Если НЕ НУЖНА сортировка по Comleted
-  //Выводим все подряд задачи
-  else
-    for (let i = 0; i < taskArr.length; i++)
-      //Порядок выведения A-Z или Z-A
-      if (sortByNumber)
-        ulTasks.insertAdjacentElement(
-          "beforeend",
-          tmpTaskItemLi(taskArr[i], i)
-        );
-      else
-        ulTasks.insertAdjacentElement(
-          "afterbegin",
-          tmpTaskItemLi(taskArr[i], i)
-        );
-  return ulTasks;
-}
-
-//ШАБЛОН переключателя отображения ALL/COMPLETED/...
-function tmplateTaskViewUl(
-  arrLiNameStr = ["All", "Completed"],
-  { sortByNumber, sortByCompleted }
-) {
-  const divTaskView = document.createElement("div");
-  divTaskView.style.display = "flex";
-
-  const divPageControl = document.createElement("div");
-  divPageControl.id = "pageControl";
-  divPageControl.className = "pl-1 pr-1";
-
-  const ulPageControl = document.createElement("ul");
-  ulPageControl.className = "nav nav-tabs";
-  ulPageControl.style.borderBottom = "0px";
-
-  for (const liNameStr of arrLiNameStr) {
-    const liPage = document.createElement("li");
-    liPage.className = "nav-item";
-    const aPage = document.createElement("a");
-    aPage.href = "#!";
-    aPage.className = "nav-link";
-    aPage.textContent = liNameStr;
-
-    //События
-    aPage.addEventListener("click", onSwitchPageEl);
-    liPage.appendChild(aPage);
-    ulPageControl.appendChild(liPage);
-  }
-
-  divPageControl.appendChild(ulPageControl);
-  divTaskView.appendChild(divPageControl);
-
-  //Кнопки сортировки
-  const divSort = document.createElement("div");
-  divSort.className = "btn-group btn-group-sm mb-2";
-  divSort.style.marginLeft = "auto";
-
-  const btnSortAZ = document.createElement("button");
-  btnSortAZ.type = "Button";
-  btnSortAZ.className = "btn btn-light";
-  btnSortAZ.textContent = "№ ";
-
-  const btnSortComp = document.createElement("button");
-  btnSortComp.type = "Button";
-  btnSortComp.className = "btn btn-light";
-  btnSortComp.textContent = "Completed ";
-  //Класс если включена сортировка Completed
-  if (sortByCompleted) btnSortComp.classList.add("active");
-
-  const icnSort = document.createElement("i");
-  icnSort.className = "fas fa-arrow-down";
-  //Класс по включеной сортировке A-z или Z-a
-  if (!sortByNumber) icnSort.classList.toggle("turn");
-
-  btnSortAZ.appendChild(icnSort);
-  divSort.appendChild(btnSortAZ);
-  divSort.appendChild(btnSortComp);
-  divTaskView.appendChild(divSort);
-
-  //События кнопок сортировки
-  btnSortAZ.addEventListener("click", onSortAZ);
-  btnSortComp.addEventListener("click", onSortComp);
-
-  return divTaskView;
-}
-
-//ШАБЛОН Сообщение что нет записей
-function tmpMessageP(msgStr) {
-  const pMessage = document.createElement("p");
-  pMessage.className = "list-group-item list-group-item-info";
-  pMessage.textContent = msgStr;
-  //Сбросим Активную страницу
-  taskView.activePage = "All";
-  return pMessage;
-}
-
-//Рендер элементов для Контейнера
-function renderHTML(
-  taskArr,
-  { activePage = "All", sortByNumber, sortByCompleted }
-) {
-  //наш контейнер, удаляем содержимое
-  const divContainer = document.querySelector("#Container");
-  while (divContainer.childElementCount > 0) divContainer.firstChild.remove();
-
-  //если задачь есть то показываем их
-  if (taskArr.length) {
-    //верхняя панель с нашими настройками отображения
-    divContainer.appendChild(
-      tmplateTaskViewUl(["All", "Completed", "Not completed"], {
-        activePage,
-        sortByNumber,
-        sortByCompleted
-      })
-    );
-    //Выводим список задач
-    divContainer.appendChild(
-      tmpTasksListUl(taskArr, { activePage, sortByNumber, sortByCompleted })
-    );
-    //Выделить активную вкладку, сымитировав по ней onClick
-    const aPages = document.querySelector("#pageControl").querySelectorAll("a");
-    aPages.forEach(el => {
-      if (el.textContent.toUpperCase() === activePage.toUpperCase()) el.click();
-    });
-    //если нет задачь - выводим сообщение
-  } else divContainer.appendChild(tmpMessageP("No tasks..."));
-}
-
-//---------------------------------------------------------------
-
-//Событие добавления объекта
-function onAddNewEl(el) {
-  el.stopPropagation();
-  const titleTask = document.querySelector("#InputTaskTitle").value;
-  const SpecTask = document.querySelector("#InputTaskSpecification").value;
-  const CompTask = document.querySelector("#CheckCompleted").checked;
-  const idTask = genID(); //генератор ID из taskGenerator.js
-  const task = {
-    _id: idTask,
-    title: titleTask,
-    specification: SpecTask,
-    completed: CompTask
+    //Массив задач
+    list
   };
-  document.forms[0].reset();
-
-  taskArr.push(task);
-  renderHTML(taskArr, taskView);
 }
 
-//Событие удаления <li> и из массива
-function onRemoveEl(el) {
-  el.stopPropagation();
-  const { target } = el;
-  const parent = target.closest("[data-task-id]");
-  const id = parent.dataset.taskId;
-  parent.remove();
-  taskArr.splice(taskArr.map(el => el._id).indexOf(id), 1);
-  renderHTML(taskArr, taskView);
-}
+//Модуль для работы с интерфесом документа
+function InitRenderUI(parent) {
+  let visiblecompleted = true;
 
-//Событие выполненное/не выполненное
-function onCompletedEl(el) {
-  el.stopPropagation();
-  const { target } = el;
-  const parent = target.closest("[data-task-id]");
-  const id = parent.dataset.taskId;
-  taskArr[taskArr.map(el => el._id).indexOf(id)].completed = !taskArr[
-    taskArr.map(el => el._id).indexOf(id)
-  ].completed;
-  renderHTML(taskArr, taskView);
-}
+  function listItemTemplate(task) {
+    const li = document.createElement("li");
+    li.classList.add(
+      "list-group-item",
+      "align-items-center",
+      "flex-wrap",
+      "list-group-item-action",
+      "d-flex"
+    );
+    li.setAttribute("data-task-id", task._id);
+    li.setAttribute("completed", task.completed);
+    if (task.completed) li.classList.add("list-group-item-info");
+    if (task.completed && !visiblecompleted) toggleItemDisplay(li);
 
-//Переключить видимость
-function onSwitchPageEl(el) {
-  el.stopPropagation();
-  const { target } = el;
-  // const parent = target.closest("ul");
+    const span = document.createElement("span");
+    span.textContent = task.title;
+    span.style.fontWeight = "bold";
+    span.style.maxWidth = "860px";
 
-  [...document.querySelectorAll("a")].forEach(e =>
-    e.classList.remove("active")
-  );
-  target.classList.add("active");
+    const CompletedBtn = document.createElement("button");
+    CompletedBtn.textContent = "Completed";
+    CompletedBtn.classList.add("btn", "btn-info", "ml-auto", "completed-btn");
+    CompletedBtn.addEventListener("click", el => {
+      const liParent = el.target.closest("[data-task-id]");
+      const liTask = tasks.list[liParent.dataset.taskId];
+      tasks.switchcompleted(liTask._id);
+      li.setAttribute("completed", task.completed);
+      liParent.classList.toggle("list-group-item-info");
+      if (liTask.completed && !visiblecompleted) toggleItemDisplay(liParent);
+      sortedAppendLi(parent.querySelectorAll("[data-task-id]"));
+    });
 
-  switch (target.textContent.toUpperCase()) {
-    case "ALL":
-      document
-        .querySelectorAll("[data-task-completed]")
-        .forEach(el => (el.style.display = "block"));
-      break;
-    case "COMPLETED":
-      document.querySelectorAll("[data-task-completed]").forEach(el => {
-        if (el.dataset.taskCompleted === "true") el.style.display = "block";
-        else el.style.display = "none";
-      });
-      break;
-    case "NOT COMPLETED":
-      document.querySelectorAll("[data-task-completed]").forEach(el => {
-        if (el.dataset.taskCompleted === "false") el.style.display = "block";
-        else el.style.display = "none";
-      });
-      break;
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete";
+    deleteBtn.classList.add("btn", "btn-danger", "ml-2", "delete-btn");
+    deleteBtn.addEventListener("click", el => {
+      const liParent = el.target.closest("[data-task-id]");
+      tasks.remove(liParent.dataset.taskId);
+      liParent.remove();
+      checkListEmply();
+    });
+
+    const article = document.createElement("p");
+    article.textContent = task.body;
+    article.classList.add("mt-2", "w-100");
+
+    li.appendChild(span);
+    li.appendChild(CompletedBtn);
+    li.appendChild(deleteBtn);
+    li.appendChild(article);
+    return li;
   }
-  taskView.activePage = target.textContent;
+
+  function checkListEmply() {
+    const divWarning = document.querySelector("#warning-list-empty");
+    const divViewSet = document.querySelector("#panel-view-settings");
+    divWarning.classList.add("d-none");
+    divViewSet.classList.remove("d-none");
+
+    if (parent.childElementCount === 0) {
+      divWarning.classList.toggle("d-none");
+      divViewSet.classList.toggle("d-none");
+    }
+  }
+
+  function sortedAppendLi(liAll, container = parent) {
+    liAll.forEach(el => {
+      if (tasks.list[el.dataset.taskId].completed) container.appendChild(el);
+      else
+        container.insertBefore(
+          el,
+          container.querySelector('li[completed="true"]')
+        );
+    });
+  }
+
+  function toggleItemDisplay(li) {
+    li.classList.toggle("d-flex");
+    li.classList.toggle("d-none");
+  }
+
+  return {
+    //методы
+    addTaskList: objOfTasks => {
+      const fragment = document.createDocumentFragment();
+      Object.values(objOfTasks).forEach(task => {
+        sortedAppendLi([listItemTemplate(task)], fragment);
+      });
+      parent.appendChild(fragment);
+      checkListEmply();
+    },
+
+    addItem: task => {
+      sortedAppendLi([listItemTemplate(task)]);
+      checkListEmply();
+    },
+
+    switchView: (visible = !visiblecompleted) => {
+      if (visible === visiblecompleted) return;
+      const liAll = parent.querySelectorAll('li[completed="true"]');
+      liAll.forEach(li => {
+        toggleItemDisplay(li);
+      });
+      visiblecompleted = visible;
+    }
+  };
 }
 
-//Сортировка AZ или ZA
-function onSortAZ() {
-  taskView.sortByNumber = !taskView.sortByNumber;
-  renderHTML(taskArr, taskView);
-}
-//Сортировка Completed
-function onSortComp() {
-  taskView.sortByCompleted = !taskView.sortByCompleted;
-  renderHTML(taskArr, taskView);
-}
+//Инициализируем модули и выводим список задач
+const ul_tasks = document.querySelector(".tasks-list-section .list-group");
+const form_add = document.querySelector('form[name="add-task"]');
+const renderUI = InitRenderUI(ul_tasks);
+const tasks = InitTasks(arrOfTasks);
+renderUI.addTaskList(tasks.list);
 
-//---------------------------------------------------------------
+//События Submit формы
+form_add.addEventListener("submit", el => {
+  el.preventDefault();
+  const title = document.querySelector("#title").value;
+  const body = document.querySelector("#body").value;
+  const completed = document.querySelector("#completed").checked;
+  if (!title || !body)
+    return alert("Enter some values in the title and body fields, please!");
+  renderUI.addItem(tasks.addTask(title, body, completed));
+  el.target.closest("form").reset();
+});
 
-const taskView = {
-  activePage: "All",
-  sortByNumber: true,
-  sortByCompleted: true
-};
-
-//Стиль .turn развернутой на 180' стрелочки
-const icnTurn = document.createElement("style");
-icnTurn.type = "text/css";
-icnTurn.append(".turn { transform: rotate(180deg); }");
-document.head.appendChild(icnTurn);
-
-//Событие создание нового задания
-const btnAdd = document.querySelector("#AddNewTask");
-btnAdd.addEventListener("click", onAddNewEl);
-
-//Перерисовка элементов экрана
-renderHTML(taskArr, taskView);
+//События кнопок отображения
+document.querySelectorAll("#panel-view-settings button").forEach(button =>
+  button.addEventListener("click", el => {
+    if (el.target.name === "view-all") renderUI.switchView(true);
+    if (el.target.name === "view-uncompleted") renderUI.switchView(false);
+  })
+);
