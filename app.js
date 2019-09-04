@@ -86,7 +86,7 @@ function InitRenderUI(parent) {
       const liParent = el.target.closest("[data-task-id]");
       const liTask = tasks.list[liParent.dataset.taskId];
       tasks.switchcompleted(liTask._id);
-      li.setAttribute("completed", task.completed);
+      li.setAttribute("completed", liTask.completed);
       liParent.classList.toggle("list-group-item-info");
       if (liTask.completed && !visiblecompleted) toggleItemDisplay(liParent);
       sortedAppendLi(parent.querySelectorAll("[data-task-id]"));
